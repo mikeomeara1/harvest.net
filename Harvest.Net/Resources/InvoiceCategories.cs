@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using RestSharp;
 
@@ -26,9 +27,9 @@ namespace Harvest.Net
         /// <summary>
         /// List all invoice categories for the authenticated account. Makes a GET request to the Invoice_Item_Categories resource.
         /// </summary>
-        public async Task<List<InvoiceItemCategory>> ListInvoiceCategoriesAsync()
+        public async Task<List<InvoiceItemCategory>> ListInvoiceCategoriesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ExecuteAsync<List<InvoiceItemCategory>>(Request(InvoiceItemResource));
+            return await ExecuteAsync<List<InvoiceItemCategory>>(Request(InvoiceItemResource), cancellationToken);
         }
 
         /// <summary>
@@ -46,9 +47,10 @@ namespace Harvest.Net
         /// </summary>
         /// <param name="InvoiceCategoryId">The Id of the invoice category to retrieve</param>
         /// <param name="invoiceCategoryId"></param>
-        public async Task<InvoiceItemCategory> InvoiceCategoryAsync(long invoiceCategoryId)
+        /// <param name="cancellationToken"></param>
+        public async Task<InvoiceItemCategory> InvoiceCategoryAsync(long invoiceCategoryId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ExecuteAsync<InvoiceItemCategory>(Request($"{InvoiceItemResource}/{invoiceCategoryId}"));
+            return await ExecuteAsync<InvoiceItemCategory>(Request($"{InvoiceItemResource}/{invoiceCategoryId}"), cancellationToken);
         }
 
         private InvoiceItemCategoryOptions CreateInvoiceItemCategoryOptions(string name, bool useAsExpense = false,
@@ -82,9 +84,9 @@ namespace Harvest.Net
         /// <param name="name">The name of the invoice category</param>
         /// <param name="useAsExpense"></param>
         /// <param name="useAsService"></param>
-        public async Task<InvoiceItemCategory> CreateInvoiceCategoryAsync(string name, bool useAsExpense = false, bool useAsService = false)
+        public async Task<InvoiceItemCategory> CreateInvoiceCategoryAsync(string name, bool useAsExpense = false, bool useAsService = false, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await CreateInvoiceCategoryAsync(CreateInvoiceItemCategoryOptions(name, useAsExpense, useAsService));
+            return await CreateInvoiceCategoryAsync(CreateInvoiceItemCategoryOptions(name, useAsExpense, useAsService), cancellationToken);
         }
 
         private IRestRequest CreateInvoiceCategoryRequest(InvoiceItemCategoryOptions options)
@@ -109,9 +111,9 @@ namespace Harvest.Net
         /// Creates a new invoice category under the authenticated account. Makes a POST and a GET request to the Invoice_Item_Categories resource.
         /// </summary>
         /// <param name="options">The options for the new invoice category to be created</param>
-        public async Task<InvoiceItemCategory> CreateInvoiceCategoryAsync(InvoiceItemCategoryOptions options)
+        public async Task<InvoiceItemCategory> CreateInvoiceCategoryAsync(InvoiceItemCategoryOptions options, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ExecuteAsync<InvoiceItemCategory>(CreateInvoiceCategoryRequest(options));
+            return await ExecuteAsync<InvoiceItemCategory>(CreateInvoiceCategoryRequest(options), cancellationToken);
         }
 
      
@@ -121,7 +123,7 @@ namespace Harvest.Net
         /// <param name="invoiceCategoryId">The ID of the invoice category to delete</param>
         public bool DeleteInvoiceCategory(long invoiceCategoryId)
         {
-            var result = Execute(Request($"{InvoiceItemResource}/{invoiceCategoryId}", RestSharp.Method.DELETE);
+            var result = Execute(Request($"{InvoiceItemResource}/{invoiceCategoryId}", RestSharp.Method.DELETE));
 
             return result.StatusCode == System.Net.HttpStatusCode.OK;
         }
@@ -130,9 +132,9 @@ namespace Harvest.Net
         /// Delete an invoice category from the authenticated account. Makes a DELETE request to the Invoice_Item_Categories resource.
         /// </summary>
         /// <param name="invoiceCategoryId">The ID of the invoice category to delete</param>
-        public async Task<bool> DeleteInvoiceCategoryAsync(long invoiceCategoryId)
+        public async Task<bool> DeleteInvoiceCategoryAsync(long invoiceCategoryId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var result = await ExecuteAsync(Request($"{InvoiceItemResource}/{invoiceCategoryId}", RestSharp.Method.DELETE);
+            var result = await ExecuteAsync(Request($"{InvoiceItemResource}/{invoiceCategoryId}", RestSharp.Method.DELETE), cancellationToken);
 
             return result.StatusCode == System.Net.HttpStatusCode.OK;
         }
@@ -161,14 +163,14 @@ namespace Harvest.Net
         /// <param name="name">The updated name</param>
         /// <param name="unitName">The updated unit name (Unit name and price must be set together)</param>
         /// <param name="unitPrice">The updated unit price (Unit name and price must be set together)</param>
-        public async Task<InvoiceItemCategory> UpdateInvoiceCategoryAsync(long invoiceCategoryId, string name = null, bool? useAsExpense = null, bool? useAsService = null)
+        public async Task<InvoiceItemCategory> UpdateInvoiceCategoryAsync(long invoiceCategoryId, string name = null, bool? useAsExpense = null, bool? useAsService = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await UpdateInvoiceCategoryAsync(invoiceCategoryId, new InvoiceItemCategoryOptions()
             {
                 Name = name,
                 UseAsExpense = useAsExpense,
                 UseAsService = useAsService
-            });
+            }, cancellationToken);
         }
 
         private IRestRequest UpdateInvoiceCategoryRequest(long invoiceCategoryId, InvoiceItemCategoryOptions options)
@@ -195,9 +197,10 @@ namespace Harvest.Net
         /// </summary>
         /// <param name="invoiceCategoryId">The ID for the invoice category to update</param>
         /// <param name="options">The options to be updated</param>
-        public async Task<InvoiceItemCategory> UpdateInvoiceCategoryAsync(long invoiceCategoryId, InvoiceItemCategoryOptions options)
+        /// <param name="cancellationToken"></param>
+        public async Task<InvoiceItemCategory> UpdateInvoiceCategoryAsync(long invoiceCategoryId, InvoiceItemCategoryOptions options, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ExecuteAsync<InvoiceItemCategory>(UpdateInvoiceCategoryRequest(invoiceCategoryId, options));
+            return await ExecuteAsync<InvoiceItemCategory>(UpdateInvoiceCategoryRequest(invoiceCategoryId, options), cancellationToken);
         }
     }
 }

@@ -4,12 +4,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RestSharp;
 
 namespace Harvest.Net
 {
     public partial class HarvestRestClient
     {
         // https://github.com/harvesthq/api/blob/master/Sections/People.md
+        private const string PeopleResource = "people";
+
+        private IRestRequest ListUsersRequest(DateTime? updatedSince = null)
+        {
+            var request = Request(PeopleResource);
+
+            if (updatedSince != null)
+                request.AddParameter(UpdatedSinceParameter, updatedSince.Value.ToString("yyyy-MM-dd HH:mm"));
+
+            return request;
+        }
 
         /// <summary>
         /// List all users for the authenticated account. Makes a GET request to the People resource.
@@ -17,12 +29,16 @@ namespace Harvest.Net
         /// <param name="updatedSince">An optional filter on the user updated-at property</param>
         public IList<User> ListUsers(DateTime? updatedSince = null)
         {
-            var request = Request("people");
+            return Execute<List<User>>(ListUsersRequest(updatedSince));
+        }
 
-            if (updatedSince != null)
-                request.AddParameter("updated_since", updatedSince.Value.ToString("yyyy-MM-dd HH:mm"));
-
-            return Execute<List<User>>(request);
+        /// <summary>
+        /// List all users for the authenticated account. Makes a GET request to the People resource.
+        /// </summary>
+        /// <param name="updatedSince">An optional filter on the user updated-at property</param>
+        public async Task<IList<User>> ListUsersAsync(DateTime? updatedSince = null)
+        {
+            return await ExecuteAsync<List<User>>(ListUsersRequest(updatedSince));
         }
 
         /// <summary>
@@ -31,9 +47,16 @@ namespace Harvest.Net
         /// <param name="userId">The Id of the user to retrieve</param>
         public User User(long userId)
         {
-            var request = Request("people/" + userId);
+            return Execute<User>(Request($"{PeopleResource}/{userId}"));
+        }
 
-            return Execute<User>(request);
+        /// <summary>
+        /// Retrieve a user on the authenticated account. Makes a GET request to the People resource.
+        /// </summary>
+        /// <param name="userId">The Id of the user to retrieve</param>
+        public async Task<User> UserAsync(long userId)
+        {
+            return await ExecuteAsync<User>(Request($"{PeopleResource}/{userId}"));
         }
 
         /// <summary>
@@ -42,9 +65,16 @@ namespace Harvest.Net
         /// <param name="email">The email address of the user to retrieve</param>
         public User User(string email)
         {
-            var request = Request("people/" + email);
+            return Execute<User>(Request($"{PeopleResource}/{email}"));
+        }
 
-            return Execute<User>(request);
+        /// <summary>
+        /// Retrieve a user on the authenticated account. Makes a GET request to the People resource.
+        /// </summary>
+        /// <param name="email">The email address of the user to retrieve</param>
+        public async Task<User> UserAsync(string email)
+        {
+            return await ExecuteAsync<User>(Request($"{PeopleResource}/{email}"));
         }
 
         /// <summary>
