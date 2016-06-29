@@ -112,8 +112,6 @@ namespace Harvest.Net
         {
             return await ExecuteAsync<ExpenseCategory>(CreateExpenseCategoryRequest(options), cancellationToken);
         }
-
-
       
         /// <summary>
         /// Delete an expense category from the authenticated account. Makes a DELETE request to the Expense_Categories resource.
@@ -149,7 +147,7 @@ namespace Harvest.Net
             decimal? unitPrice = null)
         {
             return UpdateExpenseCategory(expenseCategoryId,
-                new ExpenseCategoryOptions() {Name = name, UnitName = unitName, UnitPrice = unitPrice});
+                new ExpenseCategoryOptions() { Name = name, UnitName = unitName, UnitPrice = unitPrice });
         }
 
         /// <summary>

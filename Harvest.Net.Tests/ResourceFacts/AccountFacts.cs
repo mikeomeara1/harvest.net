@@ -2,6 +2,8 @@
 using System;
 using System.Linq;
 using Xunit;
+using System.Threading.Tasks;
+
 
 namespace Harvest.Net.Tests
 {
@@ -11,6 +13,21 @@ namespace Harvest.Net.Tests
         public void WhoAmI_ReturnsAccountDetails()
         {
             var account = Api.WhoAmI();
+
+            Assert.NotNull(account.User);
+            Assert.NotNull(account.Company);
+            Assert.NotNull(account.Company.Modules);
+            Assert.NotNull(account.User.ProjectManager);
+
+            Assert.Equal(this.Username, account.User.Email);
+            Assert.Equal(this.Subdomain + ".harvestapp.com", account.Company.FullDomain);
+            Assert.Equal(true, account.User.Admin);
+        }
+
+        [Fact]
+        public async System.Threading.Tasks.Task WhoAmI_Async_ReturnsAccountDetails()
+        {
+            var account = await Api.WhoAmIAsync();
 
             Assert.NotNull(account.User);
             Assert.NotNull(account.Company);

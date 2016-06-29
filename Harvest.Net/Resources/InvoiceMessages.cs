@@ -30,11 +30,11 @@ namespace Harvest.Net
         /// Retrieve a list of messages for an invoice on the authenticated account. Makes a GET request to the Invoices/Messages resource.
         /// </summary>
         /// <param name="invoiceId">The ID of the invoice to retrieve messages for</param>
+        /// <param name="cancellationToken"></param>
         public async Task<IList<InvoiceMessage>> ListInvoiceMessagesAsync(long invoiceId, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await ExecuteAsync<List<InvoiceMessage>>(Request($"{InvoicesResource}/{invoiceId}/messages"), cancellationToken);
         }
-
       
         /// <summary>
         /// Retrieve a single message for an invoice on the authenticated account. Makes a GET request to the Invoices/Messages resource.
@@ -51,6 +51,7 @@ namespace Harvest.Net
         /// </summary>
         /// <param name="invoiceId">The ID of the invoice the message is on</param>
         /// <param name="messageId">The ID of the message to retrieve</param>
+        /// <param name="cancellationToken"></param>
         public async Task<InvoiceMessage> InvoiceMessageAsync(long invoiceId, long messageId, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await ExecuteAsync<InvoiceMessage>(Request($"{InvoicesResource}/{invoiceId}/messages/{messageId}"), cancellationToken);
@@ -112,8 +113,6 @@ namespace Harvest.Net
         /// <param name="options">The options of the message to send</param>
         public InvoiceMessage SendInvoice(long invoiceId, InvoiceMessageOptions options)
         {
-           
-
             return Execute<InvoiceMessage>(SendInvoiceRequest(invoiceId, options));
         }
 
@@ -126,7 +125,6 @@ namespace Harvest.Net
         {
             return await ExecuteAsync<InvoiceMessage>(SendInvoiceRequest(invoiceId, options), cancellationToken);
         }
-
 
         /// <summary>
         /// Delete an existing invoice message from the authenticated account. Makes a DELETE request to the Invoices/Messages resource.
@@ -197,7 +195,6 @@ namespace Harvest.Net
         {
             return await MarkInvoiceAsync(invoiceId, body, Models.InvoiceMessageAction.MarkAsClosed, cancellationToken);
         }
-
 
         /// <summary>
         /// Mark an existing invoice from the authenticated account as sent. Makes a POST request to the Invoices/Messages resource.

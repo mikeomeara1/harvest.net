@@ -92,7 +92,6 @@ namespace Harvest.Net
             };
         }
 
-
         /// <summary>
         /// Create a new expense for on the authenticated account. Makes both a POST and a GET request to the Expense resource.
         /// </summary>
@@ -121,6 +120,7 @@ namespace Harvest.Net
         /// <param name="notes">The notes on the expense</param>
         /// <param name="isBillable">Whether the expense is billable</param>
         /// <param name="ofUser"></param>
+        /// <param name="cancellationToken"></param>
         /// DateTime spentAt, long projectId, long expenseCategoryId, decimal? totalCost = null, decimal? units = null, string notes = null, bool isBillable = true, long? ofUser = null
         public async Task<Expense> CreateExpenseAsync(DateTime spentAt, long projectId, long expenseCategoryId,
             decimal? totalCost = null, decimal? units = null, string notes = null, bool isBillable = true,
@@ -154,6 +154,7 @@ namespace Harvest.Net
         /// Creates a new expense under the authenticated account. Makes a POST and a GET request to the Expenses resource.
         /// </summary>
         /// <param name="options">The options for the new expense to be created</param>
+        /// <param name="ofUser"></param>
         /// <param name="cancellationToken"></param>
         public async Task<Expense> CreateExpenseAsync(ExpenseOptions options, long? ofUser = null, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -174,6 +175,7 @@ namespace Harvest.Net
         /// Delete an expense from the authenticated account. Makes a DELETE request to the Expenses resource.
         /// </summary>
         /// <param name="expenseId">The ID of the expense to delete</param>
+        /// <param name="ofUser"></param>
         public bool DeleteExpense(long expenseId, long? ofUser = null)
         {
             var result = Execute(DeleteExpenseRequest(expenseId, ofUser));
@@ -185,6 +187,7 @@ namespace Harvest.Net
         /// Delete an expense from the authenticated account. Makes a DELETE request to the Expenses resource.
         /// </summary>
         /// <param name="expenseId">The ID of the expense to delete</param>
+        /// <param name="ofUser"></param>
         /// <param name="cancellationToken"></param>
         public async Task<bool> DeleteExpenseAsync(long expenseId, long? ofUser = null, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -220,7 +223,6 @@ namespace Harvest.Net
                 Units = units
             }, ofUser);
         }
-
 
         /// <summary>
         /// Update an existing expense on the authenticated account. Makes both a PUT and GET request to the Expenses resource.
@@ -282,7 +284,6 @@ namespace Harvest.Net
         {
             return await ExecuteAsync<Expense>(UpdateExpenseRequest(expenseId, options, ofUser), cancellationToken);
         }
-
 
         private static readonly Dictionary<string, string> AllowedReceiptFileTypes = new Dictionary<string, string>()
         {

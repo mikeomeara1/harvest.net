@@ -9,7 +9,6 @@ using RestSharp;
 
 namespace Harvest.Net
 {
-    
     public partial class HarvestRestClient
     {
         private const string ClientsResource = "clients";
@@ -64,7 +63,6 @@ namespace Harvest.Net
             return await ExecuteAsync<Client>(Request($"{ClientsResource}/{clientId}"), cancellationToken);
         }
 
-
         private ClientOptions CreateClientOptions(string name, Currency? currency = null, bool active = true,
             string details = null, long? highriseId = null)
         {
@@ -108,7 +106,6 @@ namespace Harvest.Net
             return await CreateClientAsync(this.CreateClientOptions(name, currency, active, details, highriseId), cancellationToken);
         }
 
-
         private IRestRequest CreateClientRequest(ClientOptions options)
         {
             var request = Request(ClientsResource, RestSharp.Method.POST);
@@ -137,7 +134,6 @@ namespace Harvest.Net
             return await ExecuteAsync<Client>(CreateClientRequest(options), cancellationToken);
         }
 
-
         private IRestRequest DeleteClientRequest(long clientId)
         {
             return Request($"{ClientsResource}/{clientId}", RestSharp.Method.DELETE);
@@ -164,7 +160,7 @@ namespace Harvest.Net
             return result.StatusCode == System.Net.HttpStatusCode.OK;
         }
 
-        private IRestRequest CreateToggleRequest(long clientId)
+        private IRestRequest ToggleClientRequest(long clientId)
         {
             return Request($"{ClientsResource}/{clientId}/{ToggleAction}", RestSharp.Method.POST);
         }
@@ -175,7 +171,7 @@ namespace Harvest.Net
         /// <param name="clientId">The ID of the client to toggle</param>
         public Client ToggleClient(long clientId)
         {
-            return Execute<Client>(CreateToggleRequest(clientId));
+            return Execute<Client>(ToggleClientRequest(clientId));
         }
 
         /// <summary>
@@ -185,7 +181,7 @@ namespace Harvest.Net
         /// <param name="cancellationToken"></param>
         public async Task<Client> ToggleClientAsync(long clientId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ExecuteAsync<Client>(CreateToggleRequest(clientId), cancellationToken);
+            return await ExecuteAsync<Client>(ToggleClientRequest(clientId), cancellationToken);
         }
 
     /// <summary>

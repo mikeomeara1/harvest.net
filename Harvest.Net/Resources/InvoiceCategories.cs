@@ -14,8 +14,6 @@ namespace Harvest.Net
         // https://github.com/harvesthq/api/blob/master/Sections/Invoice%20Categories.md
         private const string InvoiceItemResource = "invoice_item_categories";
 
-
-       
         /// <summary>
         /// List all invoice categories for the authenticated account. Makes a GET request to the Invoice_Item_Categories resource.
         /// </summary>
@@ -111,11 +109,11 @@ namespace Harvest.Net
         /// Creates a new invoice category under the authenticated account. Makes a POST and a GET request to the Invoice_Item_Categories resource.
         /// </summary>
         /// <param name="options">The options for the new invoice category to be created</param>
+        /// <param name="cancellationToken"></param>
         public async Task<InvoiceItemCategory> CreateInvoiceCategoryAsync(InvoiceItemCategoryOptions options, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await ExecuteAsync<InvoiceItemCategory>(CreateInvoiceCategoryRequest(options), cancellationToken);
         }
-
      
         /// <summary>
         /// Delete an invoice category from the authenticated account. Makes a DELETE request to the Invoice_Item_Categories resource.

@@ -193,7 +193,7 @@ namespace Harvest.Net
             }
 
             return null;
-        } 
+        }
 
         /// <summary>
         /// Execute a non-generic REST request

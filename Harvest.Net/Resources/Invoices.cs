@@ -54,7 +54,6 @@ namespace Harvest.Net
         /// <param name="clientId">The client ID of invoices to retrieve</param>
         public IList<Invoice> ListInvoices(int page = 1, DateTime? from = null, DateTime? to = null, DateTime? updatedSince = null, InvoiceState? status = null, long? clientId = null)
         {
-            
             return Execute<List<Invoice>>(ListInvoicesRequest(page, from, to, updatedSince, status, clientId));
         }
 
@@ -69,7 +68,6 @@ namespace Harvest.Net
         /// <param name="clientId">The client ID of invoices to retrieve</param>
         public async Task<IList<Invoice>> ListInvoicesAsync(int page = 1, DateTime? from = null, DateTime? to = null, DateTime? updatedSince = null, InvoiceState? status = null, long? clientId = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-
             return await ExecuteAsync<List<Invoice>>(ListInvoicesRequest(page, from, to, updatedSince, status, clientId), cancellationToken);
         }
 
@@ -114,7 +112,6 @@ namespace Harvest.Net
 
             return invoice;
         }
-
 
         /// <summary>
         /// Create a new invoice on the authenticated account. Makes both a POST and a GET request to the Invoices resource.
@@ -186,7 +183,6 @@ namespace Harvest.Net
         {
             return await ExecuteAsync<Invoice>(CreateInvoiceRequest(options), cancellationToken);
         }
-
         
         /// <summary>
         /// Delete an invoice from the authenticated account. Makes a DELETE request to the Invoices resource.

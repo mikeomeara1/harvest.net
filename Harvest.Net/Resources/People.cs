@@ -256,7 +256,6 @@ namespace Harvest.Net
             return await ExecuteAsync<User>(Request($"{PeopleResource}/{userId}/{ResetPasswordAction}", RestSharp.Method.POST), cancellationToken);
         }
 
-
         /// <summary>
         /// Update a user on the authenticated account. Makes a PUT and a GET request to the People resource.
         /// </summary>

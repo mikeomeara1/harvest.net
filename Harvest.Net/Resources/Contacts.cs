@@ -150,7 +150,6 @@ namespace Harvest.Net
             return await CreateContactAsync(ContactOptions(clientId, firstName, lastName, title, email, phoneOffice, phoneMobile, fax), cancellationToken);
         }
 
-
         private IRestRequest CreateContactRequest(ContactOptions options)
         {
             var request = Request($"{ContactsResource}", RestSharp.Method.POST);
@@ -198,6 +197,7 @@ namespace Harvest.Net
         /// Delete a contact from the authenticated account. Makes a DELETE request to the Contacts resource.
         /// </summary>
         /// <param name="contactId">The ID of the contact to delete</param>
+        /// <param name="cancellationToken"></param>
         public async Task<bool> DeleteContactAsync(long contactId, CancellationToken cancellationToken = default(CancellationToken))
         {
             var result = await ExecuteAsync(DeleteContractRequest(contactId), cancellationToken);
