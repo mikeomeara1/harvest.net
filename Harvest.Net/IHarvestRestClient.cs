@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Harvest.Net
@@ -18,6 +19,12 @@ namespace Harvest.Net
             where T : new();
 
         IRestResponse Execute(IRestRequest request);
+
+        Task<IRestResponse> ExecuteAsync(IRestRequest request,
+            CancellationToken cancellationToken = default(CancellationToken));
+
+        Task<T> ExecuteAsync<T>(IRestRequest request,
+            CancellationToken cancellationToken = default(CancellationToken));
 
         IOAuth RefreshToken(string refreshToken);
     }

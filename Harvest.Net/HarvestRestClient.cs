@@ -7,11 +7,15 @@ using RestSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Harvest.Net
 {
     public partial class HarvestRestClient : IHarvestRestClient
     {
+        private const string UpdatedSinceParameter = "updated_since";
+
         /// <summary>
         /// Base URL of API
         /// </summary>
@@ -136,6 +140,35 @@ namespace Harvest.Net
                 throw new HarvestException(response);
 
             if (response.Data == null)
+                response = _client.Execute<T>(this.LoadRequest(request, response));
+
+            return response.Data;
+        }
+
+        public virtual async Task<T> ExecuteAsync<T>(IRestRequest request,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            // No Null Reference Danger if Caller Omitted (Struct)
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var response = await _client.ExecuteTaskAsync<T>(request, cancellationToken);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                throw new HarvestException(response);
+
+            if (response.Data == null)
+            {
+                // No Null Reference Danger if Caller Omitted (Struct)
+                cancellationToken.ThrowIfCancellationRequested();
+                response = await _client.ExecuteTaskAsync<T>(this.LoadRequest(request, response), cancellationToken);
+            }
+
+            return response.Data;
+        }
+
+        private IRestRequest LoadRequest<T>(IRestRequest request, IRestResponse<T> response)
+        {
+            if (response.Data == null)
             {
                 if (response.StatusCode == System.Net.HttpStatusCode.Created
                     || response.StatusCode == System.Net.HttpStatusCode.Accepted
@@ -155,12 +188,12 @@ namespace Harvest.Net
                     }
 
                     var loadRequest = Request(location);
-                    response = _client.Execute<T>(loadRequest);
+                    return loadRequest;
                 }
             }
 
-            return response.Data;
-        }
+            return null;
+        } 
 
         /// <summary>
         /// Execute a non-generic REST request
@@ -169,6 +202,14 @@ namespace Harvest.Net
         public virtual IRestResponse Execute(IRestRequest request)
         {
             return _client.Execute(request);
+        }
+
+        public virtual async Task<IRestResponse> ExecuteAsync(IRestRequest request, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            // No Null Reference Danger if Caller Omitted (Struct)
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return await _client.ExecuteTaskAsync(request, cancellationToken);
         }
 
         /// <summary>
