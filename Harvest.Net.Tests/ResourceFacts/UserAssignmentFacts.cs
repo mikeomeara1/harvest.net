@@ -1,12 +1,14 @@
 ﻿using Harvest.Net.Models;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Harvest.Net.Tests
 {
     public class UserAssignmentFacts : FactBase, IDisposable
     {
+        #region Standard Api
         [Fact]
         public void ListUserAssignments_Returns()
         {
@@ -15,7 +17,7 @@ namespace Harvest.Net.Tests
             Assert.True(list != null, "Result list is null.");
             Assert.NotEqual(0, list.First().Id);
         }
-        
+
         [Fact]
         public void UserAssignment_ReturnsUserAssignment()
         {
@@ -25,7 +27,7 @@ namespace Harvest.Net.Tests
             Assert.Equal(GetTestId(TestId.UserId), userAssignment.UserId);
             Assert.Equal(GetTestId(TestId.ProjectId), userAssignment.ProjectId);
         }
-        
+
         /// <summary>
         /// We're testing delete and create together because the free account has a limited number of projects.
         /// There is no space to add another "clean slate" project.
@@ -48,7 +50,7 @@ namespace Harvest.Net.Tests
             // Review: Apparently assigning just reactivate it?
             //Assert.NotEqual(oldAssignment.Id, assignment.Id);
         }
-        
+
         [Fact]
         public void UpdateUserAssignment_UpdatesOnlyChangedValues()
         {
@@ -72,7 +74,77 @@ namespace Harvest.Net.Tests
             Assert.Equal(100, updated1.Budget);
             Assert.Equal(oldAssignment.Deactivated, updated1.Deactivated);
         }
-        
+
+        #endregion
+
+        #region Async Api
+        [Fact]
+        public async Task ListUserAssignmentsAsync_Returns()
+        {
+            var list = await Api.ListUserAssignmentsAsync(GetTestId(TestId.ProjectId));
+
+            Assert.True(list != null, "Result list is null.");
+            Assert.NotEqual(0, list.First().Id);
+        }
+
+        [Fact]
+        public async Task UserAssignmentAsync_ReturnsUserAssignment()
+        {
+            var userAssignment = await Api.UserAssignmentAsync(GetTestId(TestId.ProjectId), GetTestId(TestId.UserAssignmentId));
+
+            Assert.NotNull(userAssignment);
+            Assert.Equal(GetTestId(TestId.UserId), userAssignment.UserId);
+            Assert.Equal(GetTestId(TestId.ProjectId), userAssignment.ProjectId);
+        }
+
+        /// <summary>
+        /// We're testing delete and create together because the free account has a limited number of projects.
+        /// There is no space to add another "clean slate" project.
+        /// </summary>
+        [Fact]
+        public async Task DeleteAndCreateUserAssignmentAsync_ReturnsANewUserAssignment()
+        {
+            var projectId = GetTestId(TestId.ProjectId2);
+            var oldAssignment = (await Api.ListUserAssignmentsAsync(projectId)).First();
+            var userId = oldAssignment.UserId;
+
+            var result = await Api.DeleteUserAssignmentAsync(projectId, oldAssignment.Id);
+            var assignment = await Api.CreateUserAssignmentAsync(projectId, userId);
+
+            Assert.True(result, "Delete failed");
+            Assert.NotNull(assignment);
+            Assert.Equal(userId, assignment.UserId);
+            Assert.Equal(projectId, assignment.ProjectId);
+            Assert.False(assignment.Deactivated, "Assignment is inactive");
+            // Review: Apparently assigning just reactivate it?
+            //Assert.NotEqual(oldAssignment.Id, assignment.Id);
+        }
+
+        [Fact]
+        public async Task UpdateUserAssignmentAsync_UpdatesOnlyChangedValues()
+        {
+            var projectId = GetTestId(TestId.ProjectId2);
+            var oldAssignment = (await Api.ListUserAssignmentsAsync(projectId)).First();
+            var userId = oldAssignment.UserId;
+
+            var updated1 = await Api.UpdateUserAssignmentAsync(projectId, oldAssignment.Id, userId, hourlyRate: 1, budget: 100, isProjectManager: false);
+            var updated2 = await Api.UpdateUserAssignmentAsync(projectId, oldAssignment.Id, userId, hourlyRate: 2, isProjectManager: true);
+
+            // stuff changed
+            Assert.NotEqual(updated1.HourlyRate, updated2.HourlyRate);
+            Assert.Equal(1, updated1.HourlyRate);
+            Assert.NotEqual(updated1.IsProjectManager, updated2.IsProjectManager);
+            Assert.Equal(false, updated1.IsProjectManager);
+
+            // stuff didn't change
+            Assert.Equal(updated1.Id, updated2.Id);
+            Assert.Equal(projectId, updated1.ProjectId);
+            Assert.Equal(userId, updated1.UserId);
+            Assert.Equal(100, updated1.Budget);
+            Assert.Equal(oldAssignment.Deactivated, updated1.Deactivated);
+        }
+        #endregion
+
         public void Dispose()
         {
         }

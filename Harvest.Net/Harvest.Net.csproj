@@ -70,7 +70,7 @@
     <Compile Include="Models\ProjectManager.cs" />
     <Compile Include="Models\Daily.cs" />
     <Compile Include="Models\TaskOptions.cs" />
-    <Compile Include="Models\Task.cs" />
+    <Compile Include="Models\ProjectTask.cs" />
     <Compile Include="Models\AccountUser.cs" />
     <Compile Include="Models\TaskAssignment.cs" />
     <Compile Include="Models\TaskAssignmentCreateOptions.cs" />

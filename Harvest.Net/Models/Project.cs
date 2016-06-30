@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RestSharp.Deserializers;
 
 namespace Harvest.Net.Models
 {
@@ -63,6 +64,6 @@ namespace Harvest.Net.Models
         // These fields are only present on the Daily resource.
         public string Client { get; set; }
 
-        public List<Task> Tasks { get; set; }
+        public List<ProjectTask> Tasks { get; set; }
     }
 }

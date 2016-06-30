@@ -28,36 +28,36 @@ namespace Harvest.Net
         /// List all tasks for the authenticated account. Makes a GET request to the Tasks resource.
         /// </summary>
         /// <param name="updatedSince">An optional filter on the task updated-at property</param>
-        public IList<Task> ListTasks(DateTime? updatedSince = null)
+        public IList<Models.ProjectTask> ListTasks(DateTime? updatedSince = null)
         {
-            return Execute<List<Task>>(ListTasksRequest(updatedSince));
+            return Execute<List<Models.ProjectTask>>(ListTasksRequest(updatedSince));
         }
 
         /// <summary>
         /// List all tasks for the authenticated account. Makes a GET request to the Tasks resource.
         /// </summary>
         /// <param name="updatedSince">An optional filter on the task updated-at property</param>
-        public async System.Threading.Tasks.Task<IList<Task>> ListTasksAsync(DateTime? updatedSince = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async System.Threading.Tasks.Task<IList<ProjectTask>> ListTasksAsync(DateTime? updatedSince = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ExecuteAsync<List<Task>>(ListTasksRequest(updatedSince), cancellationToken);
+            return await ExecuteAsync<List<Models.ProjectTask>>(ListTasksRequest(updatedSince), cancellationToken);
         }
 
         /// <summary>
         /// Retrieve a task on the authenticated account. Makes a GET request to the Tasks resource.
         /// </summary>
         /// <param name="taskId">The Id of the task to retrieve</param>
-        public Task Task(long taskId)
+        public ProjectTask Task(long taskId)
         {
-            return Execute<Task>(Request($"{TasksResource}/{taskId}"));
+            return Execute<ProjectTask>(Request($"{TasksResource}/{taskId}"));
         }
 
         /// <summary>
         /// Retrieve a task on the authenticated account. Makes a GET request to the Tasks resource.
         /// </summary>
         /// <param name="taskId">The Id of the task to retrieve</param>
-        public async System.Threading.Tasks.Task<Task> TaskAsync(long taskId, CancellationToken cancellationToken = default(CancellationToken))
+        public async System.Threading.Tasks.Task<ProjectTask> TaskAsync(long taskId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ExecuteAsync<Task>(Request($"{TasksResource}/{taskId}"), cancellationToken);
+            return await ExecuteAsync<Models.ProjectTask>(Request($"{TasksResource}/{taskId}"), cancellationToken);
         }
 
         private TaskOptions CreateTaskOptions(string name, bool billableByDefault = false, bool isDefault = false,
@@ -82,7 +82,7 @@ namespace Harvest.Net
         /// <param name="billableByDefault">Whether the task should be billable when added to a project</param>
         /// <param name="isDefault">Whether the task should be added to new projects</param>
         /// <param name="defaultHourlyRate">The default hourly rate</param>
-        public Task CreateTask(string name, bool billableByDefault = false, bool isDefault = false, decimal? defaultHourlyRate = null)
+        public ProjectTask CreateTask(string name, bool billableByDefault = false, bool isDefault = false, decimal? defaultHourlyRate = null)
         {
             return CreateTask(CreateTaskOptions(name, billableByDefault, isDefault, defaultHourlyRate));
         }
@@ -94,7 +94,7 @@ namespace Harvest.Net
         /// <param name="billableByDefault">Whether the task should be billable when added to a project</param>
         /// <param name="isDefault">Whether the task should be added to new projects</param>
         /// <param name="defaultHourlyRate">The default hourly rate</param>
-        public async System.Threading.Tasks.Task<Task> CreateTaskAsync(string name, bool billableByDefault = false, bool isDefault = false, decimal? defaultHourlyRate = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async System.Threading.Tasks.Task<ProjectTask> CreateTaskAsync(string name, bool billableByDefault = false, bool isDefault = false, decimal? defaultHourlyRate = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await CreateTaskAsync(CreateTaskOptions(name, billableByDefault, isDefault, defaultHourlyRate), cancellationToken);
         }
@@ -112,18 +112,18 @@ namespace Harvest.Net
         /// Creates a new task under the authenticated account. Makes a POST and a GET request to the Tasks resource.
         /// </summary>
         /// <param name="options">The options for the new task to be created</param>
-        public Task CreateTask(TaskOptions options)
+        public ProjectTask CreateTask(TaskOptions options)
         {
-            return Execute<Task>(CreateTaskRequest(options));
+            return Execute<Models.ProjectTask>(CreateTaskRequest(options));
         }
 
         /// <summary>
         /// Creates a new task under the authenticated account. Makes a POST and a GET request to the Tasks resource.
         /// </summary>
         /// <param name="options">The options for the new task to be created</param>
-        public async System.Threading.Tasks.Task<Task> CreateTaskAsync(TaskOptions options, CancellationToken cancellationToken = default(CancellationToken))
+        public async System.Threading.Tasks.Task<ProjectTask> CreateTaskAsync(TaskOptions options, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ExecuteAsync<Task>(CreateTaskRequest(options), cancellationToken);
+            return await ExecuteAsync<Models.ProjectTask>(CreateTaskRequest(options), cancellationToken);
         }
 
         /// <summary>
@@ -152,18 +152,18 @@ namespace Harvest.Net
         /// Activate a task on the authenticated account. Makes a POST request to the Tasks/Activate resource and a GET request to the Tasks resource.
         /// </summary>
         /// <param name="taskId">The ID of the task to activate</param>
-        public Task ActivateTask(long taskId)
+        public ProjectTask ActivateTask(long taskId)
         {
-            return Execute<Task>(Request($"{TasksResource}/{taskId}/{ActiveAction}", RestSharp.Method.POST));
+            return Execute<Models.ProjectTask>(Request($"{TasksResource}/{taskId}/{ActiveAction}", RestSharp.Method.POST));
         }
 
         /// <summary>
         /// Activate a task on the authenticated account. Makes a POST request to the Tasks/Activate resource and a GET request to the Tasks resource.
         /// </summary>
         /// <param name="taskId">The ID of the task to activate</param>
-        public async System.Threading.Tasks.Task<Task> ActivateTaskAsync(long taskId, CancellationToken cancellationToken = default(CancellationToken))
+        public async System.Threading.Tasks.Task<ProjectTask> ActivateTaskAsync(long taskId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ExecuteAsync<Task>(Request($"{TasksResource}/{taskId}/{ActiveAction}", RestSharp.Method.POST), cancellationToken);
+            return await ExecuteAsync<Models.ProjectTask>(Request($"{TasksResource}/{taskId}/{ActiveAction}", RestSharp.Method.POST), cancellationToken);
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace Harvest.Net
         /// <param name="billableByDefault">Whether the task should be billable when added to a project</param>
         /// <param name="isDefault">Whether the task should be added to new projects</param>
         /// <param name="defaultHourlyRate">The default hourly rate</param>
-        public Task UpdateTask(long taskId, string name = null, bool? billableByDefault = null, bool? isDefault = null, decimal? defaultHourlyRate = null)
+        public ProjectTask UpdateTask(long taskId, string name = null, bool? billableByDefault = null, bool? isDefault = null, decimal? defaultHourlyRate = null)
         {
             return UpdateTask(taskId, new TaskOptions()
             {
@@ -191,7 +191,7 @@ namespace Harvest.Net
         /// <param name="billableByDefault">Whether the task should be billable when added to a project</param>
         /// <param name="isDefault">Whether the task should be added to new projects</param>
         /// <param name="defaultHourlyRate">The default hourly rate</param>
-        public async System.Threading.Tasks.Task<Task> UpdateTaskAsync(long taskId, string name = null, bool? billableByDefault = null, bool? isDefault = null, decimal? defaultHourlyRate = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async System.Threading.Tasks.Task<ProjectTask> UpdateTaskAsync(long taskId, string name = null, bool? billableByDefault = null, bool? isDefault = null, decimal? defaultHourlyRate = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await UpdateTaskAsync(taskId, new TaskOptions()
             {
@@ -216,9 +216,9 @@ namespace Harvest.Net
         /// </summary>
         /// <param name="taskId">The ID for the task to update</param>
         /// <param name="options">The options to be updated</param>
-        public Task UpdateTask(long taskId, TaskOptions options)
+        public ProjectTask UpdateTask(long taskId, TaskOptions options)
         {
-            return Execute<Task>(UpdateTaskRequest(taskId, options));
+            return Execute<Models.ProjectTask>(UpdateTaskRequest(taskId, options));
         }
 
         /// <summary>
@@ -226,9 +226,9 @@ namespace Harvest.Net
         /// </summary>
         /// <param name="taskId">The ID for the task to update</param>
         /// <param name="options">The options to be updated</param>
-        public async System.Threading.Tasks.Task<Task> UpdateTaskAsync(long taskId, TaskOptions options, CancellationToken cancellationToken = default(CancellationToken))
+        public async System.Threading.Tasks.Task<ProjectTask> UpdateTaskAsync(long taskId, TaskOptions options, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await ExecuteAsync<Task>(UpdateTaskRequest(taskId, options), cancellationToken);
+            return await ExecuteAsync<Models.ProjectTask>(UpdateTaskRequest(taskId, options), cancellationToken);
         }
     }
 }

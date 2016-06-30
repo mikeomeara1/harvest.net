@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Harvest.Net.Tests
@@ -11,6 +12,7 @@ namespace Harvest.Net.Tests
         Invoice _toDelete = null;
         const long _test = 4861513; // TODO: move this into a config file
 
+        #region Standard Api
         [Fact]
         public void ListInvoices_Returns()
         {
@@ -120,6 +122,119 @@ namespace Harvest.Net.Tests
 
             Assert.Equal(2, _toDelete.ListLineItems().Count());
         }
+        #endregion
+
+        #region Async Api
+        [Fact]
+        public async Task ListInvoicesAsync_Returns()
+        {
+            var list = await Api.ListInvoicesAsync();
+
+            Assert.True(list != null, "Result list is null.");
+            Assert.NotEqual(0, list.First().Id);
+        }
+
+        [Fact]
+        public async Task InvoiceAsync_ReturnsInvoice()
+        {
+            var invoice = await Api.InvoiceAsync(GetTestId(TestId.InvoiceId));
+
+            Assert.NotNull(invoice);
+        }
+
+        [Fact]
+        public async Task CreateInvoiceAsync_ReturnsNewInvoice()
+        {
+            var client = (await Api.ListClientsAsync()).First();
+
+            _toDelete = await Api.CreateInvoiceAsync(new InvoiceOptions()
+            {
+                ClientId = client.Id,
+                Subject = "Test Create Invoice"
+            });
+
+            Assert.Equal("Test Create Invoice", _toDelete.Subject);
+            Assert.Equal(client.Id, _toDelete.ClientId);
+        }
+
+        [Fact]
+        public async Task DeleteInvoiceAsync_ReturnsTrue()
+        {
+            var client = (await Api.ListClientsAsync()).First();
+
+            var invoice = await Api.CreateInvoiceAsync(new InvoiceOptions()
+            {
+                ClientId = client.Id,
+                Subject = "Test Delete Invoice"
+            });
+
+            var result = await Api.DeleteInvoiceAsync(invoice.Id);
+
+            Assert.Equal(true, result);
+        }
+
+        [Fact]
+        public async Task UpdateInvoiceAsync_ReturnsUpdatedInvoice()
+        {
+            var client = (await Api.ListClientsAsync()).First();
+
+            var invoice = await Api.CreateInvoiceAsync(new InvoiceOptions()
+            {
+                ClientId = client.Id,
+                Subject = "Test Update Invoice",
+                Notes = "Notes",
+                IssuedAt = DateTime.Now.AddDays(-1),
+                DueAtHumanFormat = InvoiceDateAtFormat.Net15
+            });
+
+            Assert.Equal(DateTime.Now.AddDays(14).ToString("yyyy-MM-dd"), invoice.DueAt.ToString("yyyy-MM-dd"));
+            Assert.Equal(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"), invoice.IssuedAt.ToString("yyyy-MM-dd"));
+
+            // REVIEW: Bugs in the api currently prevent setting the due-at date.
+            // https://github.com/harvesthq/api/issues/66
+
+            var updated = await Api.UpdateInvoiceAsync(invoice.Id, new InvoiceOptions()
+            {
+                Subject = "Tested",
+                //DueAtHumanFormat = InvoiceDateAtFormat.Custom,
+                //DueAt = DateTime.Now.AddDays(10)
+            });
+
+            _toDelete = invoice;
+
+            // fields that changed
+            Assert.Equal("Tested", updated.Subject);
+            //Assert.Equal(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"), updated.IssuedAt.ToString("yyyy-MM-dd"));
+            //Assert.Equal(DateTime.Now.AddDays(10).ToString("yyyy-MM-dd"), updated.DueAt.ToString("yyyy-MM-dd"));
+
+            // fields that didn't change
+            Assert.Equal(invoice.ClientId, updated.ClientId);
+            Assert.Equal(invoice.Notes, updated.Notes);
+        }
+
+        [Fact]
+        public async Task CreateInvoiceAsync_WithItemsContainsItems()
+        {
+            var client = (await Api.ListClientsAsync()).First();
+
+            var options = new InvoiceOptions()
+            {
+                ClientId = client.Id,
+                Subject = "Test Items Invoice",
+                Kind = InvoiceKind.FreeForm
+            };
+
+            options.SetInvoiceItems(new List<InvoiceItem>()
+            {
+                new InvoiceItem() { Kind = "Product", Description = "Description 1", Quantity = 1, Amount = 10 },
+                new InvoiceItem() { Kind = "Product", Description = "Description 2", Quantity = 2, Amount = 10 }
+            });
+
+            _toDelete = await Api.CreateInvoiceAsync(options);
+
+            Assert.Equal(2, _toDelete.ListLineItems().Count());
+        }
+        #endregion
 
         public void Dispose()
         {

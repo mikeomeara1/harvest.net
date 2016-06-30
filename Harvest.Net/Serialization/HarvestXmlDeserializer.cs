@@ -321,7 +321,14 @@ namespace Harvest.Net.Serialization
 
             var list = (IList)Activator.CreateInstance(type);
 
+            
+
             var elements = root.Descendants(t.Name.AsNamespaced(Namespace));
+
+            if (!elements?.Any() ?? false)
+            {
+                elements = root.Descendants(this.GetAttribute<SerializeAsAttribute>(t, true).Name.AsNamespaced(Namespace));
+            }
 
             var name = t.Name;
 
@@ -358,6 +365,24 @@ namespace Harvest.Net.Serialization
             }
 
             return list;
+        }
+
+        private T GetAttribute<T>(Type type, bool isRequired = false)
+              where T : Attribute
+        {
+            var attribute = type.GetCustomAttributes(typeof(T), false).SingleOrDefault();
+
+            if (attribute == null && isRequired)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "The {0} attribute must be defined on member {1}",
+                        typeof(T).Name,
+                        typeof(Type).Name));
+            }
+
+            return (T)attribute;
         }
 
         protected virtual object CreateAndMap(Type t, XElement element)

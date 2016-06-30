@@ -85,6 +85,17 @@ namespace Harvest.Net
             return CreateExpenseCategory(ExpenseCategoryOptions(name, unitName, unitPrice));
         }
 
+        /// <summary>
+        /// Creates a new expense category under the authenticated account. Makes both a POST and a GET request to the Expense_Categories resource.
+        /// </summary>
+        /// <param name="name">The name of the expense category</param>
+        /// <param name="unitName">The unit name of the expense category (Unit name and price must be set together)</param>
+        /// <param name="unitPrice">The unit price of the expense category (Unit name and price must be set together)</param>
+        public async Task<ExpenseCategory> CreateExpenseCategoryAsync(string name, string unitName = null, decimal? unitPrice = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return await CreateExpenseCategoryAsync(ExpenseCategoryOptions(name, unitName, unitPrice), cancellationToken);
+        }
+
         private IRestRequest CreateExpenseCategoryRequest(ExpenseCategoryOptions options)
         {
             var request = Request(ExpenseCategoriesResource, RestSharp.Method.POST);

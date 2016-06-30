@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Harvest.Net.Tests
@@ -11,6 +12,7 @@ namespace Harvest.Net.Tests
         InvoiceMessage _toDeleteMessage = null;
         Invoice _toDeleteInvoice = null;
 
+        #region Standard Api
         [Fact]
         public void ListInvoiceMessages_Returns()
         {
@@ -77,6 +79,75 @@ namespace Harvest.Net.Tests
             Assert.Equal(InvoiceState.Open, invoice.State);
         }
 
+        #endregion
+
+        #region Async Api
+        [Fact]
+        public async Task ListInvoiceMessagesAsync_Returns()
+        {
+            var invoice = await Api.InvoiceAsync(GetTestId(TestId.InvoiceId));
+
+            var messages = await Api.ListInvoiceMessagesAsync(invoice.Id);
+
+            Assert.NotNull(messages);
+            Assert.NotEqual(0, messages.First().Id);
+        }
+
+        [Fact]
+        public async Task InvoiceMessageAsync_Returns()
+        {
+            var invoice = await Api.InvoiceAsync(GetTestId(TestId.InvoiceId));
+
+            var message = await Api.InvoiceMessageAsync(invoice.Id, (await Api.ListInvoiceMessagesAsync(invoice.Id)).First().Id);
+
+            Assert.NotNull(message);
+            Assert.NotEqual(0, message.Id);
+        }
+
+        [Fact]
+        public async Task StateChangesApplyAsync()
+        {
+            var invoice = await Api.CreateInvoiceAsync(InvoiceKind.FreeForm, GetTestId(TestId.ClientId), DateTime.Now, lineItems: new List<InvoiceItem>());
+            _toDeleteInvoice = invoice;
+
+            Assert.Equal(InvoiceState.Draft, invoice.State);
+
+            // test send
+            var success = await Api.MarkInvoiceSentAsync(invoice.Id, "MARK AS SENT");
+            var messages = await Api.ListInvoiceMessagesAsync(invoice.Id);
+            invoice = await Api.InvoiceAsync(invoice.Id);
+
+            Assert.True(success);
+            Assert.Contains("MARK AS SENT", messages.Select(m => m.Body));
+            Assert.Equal(InvoiceState.Open, invoice.State);
+
+            // test draft
+            success = await Api.MarkInvoiceDraftAsync(invoice.Id);
+            invoice = await Api.InvoiceAsync(invoice.Id);
+
+            Assert.True(success);
+            Assert.Equal(InvoiceState.Draft, invoice.State);
+
+            // test close
+            await Api.MarkInvoiceSentAsync(invoice.Id, null);
+            success = await Api.MarkInvoiceClosedAsync(invoice.Id, "MARK AS CLOSED");
+            messages = await Api.ListInvoiceMessagesAsync(invoice.Id);
+            invoice = await Api.InvoiceAsync(invoice.Id);
+
+            Assert.True(success);
+            Assert.Contains("MARK AS CLOSED", messages.Select(m => m.Body));
+            Assert.Equal(InvoiceState.Closed, invoice.State);
+
+            // test reopen
+            success = await Api.ReopenInvoiceAsync(invoice.Id, "RE-OPEN");
+            messages = await Api.ListInvoiceMessagesAsync(invoice.Id);
+            invoice = await Api.InvoiceAsync(invoice.Id);
+
+            Assert.True(success);
+            //Assert.Contains("RE-OPEN", messages.Select(m => m.Body)); I think there is a bug in Harvest. The body does not get saved on reopen.
+            Assert.Equal(InvoiceState.Open, invoice.State);
+        }
+        #endregion
 
         public void Dispose()
         {

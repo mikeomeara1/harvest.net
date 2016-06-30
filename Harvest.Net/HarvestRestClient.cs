@@ -246,6 +246,7 @@ namespace Harvest.Net
 
             request.RequestFormat = DataFormat.Xml;
             request.XmlSerializer = new HarvestXmlSerializer() { DateFormat = this.DateFormat };
+            
 
             request.OnBeforeDeserialization = resp =>
             {

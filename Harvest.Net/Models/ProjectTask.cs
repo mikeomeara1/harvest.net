@@ -1,13 +1,14 @@
-﻿using RestSharp.Serializers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using RestSharp.Deserializers;
+using RestSharp.Serializers;
 
 namespace Harvest.Net.Models
 {
     [SerializeAs(Name = "task")]
-    public class Task : IModel
+    public class ProjectTask : IModel
     {
         public long Id { get; set; }
 

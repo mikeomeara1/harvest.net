@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Harvest.Net.Tests
@@ -10,6 +11,7 @@ namespace Harvest.Net.Tests
     {
         Expense _todelete = null;
 
+        #region Standard Api
         [Fact]
         public void ListExpenses_Returns()
         {
@@ -21,7 +23,7 @@ namespace Harvest.Net.Tests
             Assert.NotNull(list);
             Assert.NotEqual(0, list.First().Id);
         }
-        
+
         [Fact]
         public void Expense_ReturnsExpense()
         {
@@ -52,7 +54,7 @@ namespace Harvest.Net.Tests
             Assert.Equal(GetTestId(TestId.ProjectId), _todelete.ProjectId);
             Assert.Equal(GetTestId(TestId.ExpenseCategoryId), _todelete.ExpenseCategoryId);
         }
-        
+
         [Fact]
         public void UpdateExpense_UpdatesOnlyChangedValues()
         {
@@ -85,13 +87,97 @@ namespace Harvest.Net.Tests
                 fileBytes = new byte[resourceFilestream.Length];
                 resourceFilestream.Read(fileBytes, 0, fileBytes.Length);
             }
-            
+
             var attached = Api.AttachExpenseReceipt(_todelete.Id, fileBytes, "receipt.jpg");
 
             Assert.Equal(true, attached.HasReceipt);
             Assert.NotNull(attached.ReceiptUrl);
         }
-        
+        #endregion
+
+        #region Async Api
+        [Fact]
+        public async Task ListExpensesAsync_Returns()
+        {
+            // ListExpenses only lists the current week, so we must create an expense for today to ensure there is something in the list.
+            _todelete = await Api.CreateExpenseAsync(DateTime.Now.Date, GetTestId(TestId.ProjectId), GetTestId(TestId.ExpenseCategoryId), totalCost: 1, notes: "List Test");
+
+            var list = await Api.ListExpensesAsync();
+
+            Assert.NotNull(list);
+            Assert.NotEqual(0, list.First().Id);
+        }
+
+        [Fact]
+        public async Task ExpenseAsync_ReturnsExpense()
+        {
+            var Expense = await Api.ExpenseAsync(GetTestId(TestId.ExpenseId));
+
+            Assert.NotNull(Expense);
+            Assert.Equal(GetTestId(TestId.ProjectId), Expense.ProjectId);
+            Assert.Equal(GetTestId(TestId.ExpenseCategoryId), Expense.ExpenseCategoryId);
+        }
+
+        [Fact]
+        public async Task DeleteExpenseAsync_ReturnsTrue()
+        {
+            var Expense = await Api.CreateExpenseAsync(DateTime.Now, GetTestId(TestId.ProjectId), GetTestId(TestId.ExpenseCategoryId), totalCost: 1, notes: "Delete Test");
+
+            var result = await Api.DeleteExpenseAsync(Expense.Id);
+
+            Assert.Equal(true, result);
+        }
+
+        [Fact]
+        public async Task CreateExpenseAsync_ReturnsANewExpense()
+        {
+            var date = DateTime.Now.Date;
+            _todelete = await Api.CreateExpenseAsync(date, GetTestId(TestId.ProjectId), GetTestId(TestId.ExpenseCategoryId), totalCost: 1, notes: "Create Test");
+            Assert.Equal(date, _todelete.SpentAt);
+            Assert.Equal(GetTestId(TestId.ProjectId), _todelete.ProjectId);
+            Assert.Equal(GetTestId(TestId.ExpenseCategoryId), _todelete.ExpenseCategoryId);
+        }
+
+        [Fact]
+        public async Task UpdateExpenseAsync_UpdatesOnlyChangedValues()
+        {
+            var date = DateTime.Now.Date;
+            _todelete = await Api.CreateExpenseAsync(date, GetTestId(TestId.ProjectId), GetTestId(TestId.ExpenseCategoryId), totalCost: 1, notes: "Update Test");
+
+            var updated = await Api.UpdateExpenseAsync(_todelete.Id, spentAt: date.AddDays(1), totalCost: 2);
+
+            // stuff changed
+            Assert.NotEqual(_todelete.SpentAt, updated.SpentAt);
+            Assert.Equal(date.AddDays(1), updated.SpentAt);
+            Assert.NotEqual(_todelete.TotalCost, updated.TotalCost);
+            Assert.Equal(2, updated.TotalCost);
+
+            // stuff didn't change
+            Assert.Equal(_todelete.ProjectId, updated.ProjectId);
+            Assert.Equal(_todelete.Notes, updated.Notes);
+        }
+
+        [Fact]
+        public async Task AttachExpenseReceiptAsync_AttachesFile()
+        {
+            _todelete = await Api.CreateExpenseAsync(DateTime.Now.Date, GetTestId(TestId.ProjectId), GetTestId(TestId.ExpenseCategoryId), totalCost: 1, notes: "Upload Test");
+
+            System.Reflection.Assembly factAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+
+            byte[] fileBytes;
+            using (Stream resourceFilestream = factAssembly.GetManifestResourceStream("Harvest.Net.Tests.receipt.jpg"))
+            {
+                fileBytes = new byte[resourceFilestream.Length];
+                resourceFilestream.Read(fileBytes, 0, fileBytes.Length);
+            }
+
+            var attached = await Api.AttachExpenseReceiptAsync(_todelete.Id, fileBytes, "receipt.jpg");
+
+            Assert.Equal(true, attached.HasReceipt);
+            Assert.NotNull(attached.ReceiptUrl);
+        }
+        #endregion
+
         public void Dispose()
         {
             if (_todelete != null)

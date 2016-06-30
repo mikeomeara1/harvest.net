@@ -9,6 +9,7 @@ namespace Harvest.Net.Tests
 {
     public class AccountFacts : FactBase
     {
+        #region Standard Api
         [Fact]
         public void WhoAmI_ReturnsAccountDetails()
         {
@@ -23,9 +24,11 @@ namespace Harvest.Net.Tests
             Assert.Equal(this.Subdomain + ".harvestapp.com", account.Company.FullDomain);
             Assert.Equal(true, account.User.Admin);
         }
+        #endregion
 
+        #region Async Api
         [Fact]
-        public async System.Threading.Tasks.Task WhoAmI_Async_ReturnsAccountDetails()
+        public async Task WhoAmI_Async_ReturnsAccountDetails()
         {
             var account = await Api.WhoAmIAsync();
 
@@ -38,5 +41,6 @@ namespace Harvest.Net.Tests
             Assert.Equal(this.Subdomain + ".harvestapp.com", account.Company.FullDomain);
             Assert.Equal(true, account.User.Admin);
         }
+        #endregion
     }
 }

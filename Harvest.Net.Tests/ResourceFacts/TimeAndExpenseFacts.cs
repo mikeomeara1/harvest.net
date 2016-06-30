@@ -1,6 +1,7 @@
 ﻿using Harvest.Net.Models;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Harvest.Net.Tests
@@ -10,6 +11,7 @@ namespace Harvest.Net.Tests
         const string TEST_HOUR_NOTES = "Test DO NOT DELETE";
         const string TEST_EXPENSE_NOTES = "DO NOT DELETE";
 
+        #region Standard Api
         [Fact]
         public void ListUserEntires_ReturnsEntries()
         {
@@ -119,5 +121,119 @@ namespace Harvest.Net.Tests
             Assert.Equal(TEST_EXPENSE_NOTES, notClosed.First().Notes);
             Assert.Equal(0, closed.Count());
         }
+        #endregion
+
+        #region Async Api
+        [Fact]
+        public async Task ListUserEntiresAsync_ReturnsEntries()
+        {
+            var list = await Api.ListUserEntriesAsync(GetTestId(TestId.UserId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20));
+
+            Assert.True(list != null, "Result list is null.");
+            Assert.NotEqual(0, list.First().Id);
+            Assert.Equal(TEST_HOUR_NOTES, list.First().Notes);
+        }
+
+        [Fact]
+        public async Task ListUserEntiresAsync_FiltersCorrectly()
+        {
+            var notBillable = await Api.ListUserEntriesAsync(GetTestId(TestId.UserId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isBillable: false);
+            var billable = await Api.ListUserEntriesAsync(GetTestId(TestId.UserId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isBillable: true);
+            var notBilled = await Api.ListUserEntriesAsync(GetTestId(TestId.UserId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isBilled: false);
+            var billed = await Api.ListUserEntriesAsync(GetTestId(TestId.UserId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isBilled: true);
+            var notClosed = await Api.ListUserEntriesAsync(GetTestId(TestId.UserId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isClosed: false);
+            var closed = await Api.ListUserEntriesAsync(GetTestId(TestId.UserId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isClosed: true);
+            var rightProject = await Api.ListUserEntriesAsync(GetTestId(TestId.UserId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), projectId: GetTestId(TestId.ProjectId));
+            var wrongProject = await Api.ListUserEntriesAsync(GetTestId(TestId.UserId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), projectId: GetTestId(TestId.ProjectId2));
+
+            Assert.Equal(TEST_HOUR_NOTES, notBillable.First().Notes);
+            Assert.Equal(0, billable.Count());
+            Assert.Equal(TEST_HOUR_NOTES, notBilled.First().Notes);
+            Assert.Equal(0, billed.Count());
+            Assert.Equal(TEST_HOUR_NOTES, notClosed.First().Notes);
+            Assert.Equal(0, closed.Count());
+            Assert.Equal(TEST_HOUR_NOTES, rightProject.First().Notes);
+            Assert.Equal(0, wrongProject.Count());
+        }
+
+        [Fact]
+        public async Task ListProjectEntiresAsync_ReturnsEntries()
+        {
+            var list = await Api.ListProjectEntriesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20));
+
+            Assert.True(list != null, "Result list is null.");
+            Assert.NotEqual(0, list.First().Id);
+            Assert.Equal(TEST_HOUR_NOTES, list.First().Notes);
+        }
+
+        [Fact]
+        public async Task ListProjectEntiresAsync_FiltersCorrectly()
+        {
+            var notBillable = await Api.ListProjectEntriesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isBillable: false);
+            var billable = await Api.ListProjectEntriesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isBillable: true);
+            var notBilled = await Api.ListProjectEntriesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isBilled: false);
+            var billed = await Api.ListProjectEntriesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isBilled: true);
+            var notClosed = await Api.ListProjectEntriesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isClosed: false);
+            var closed = await Api.ListProjectEntriesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), isClosed: true);
+            var rightUser = await Api.ListProjectEntriesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), userId: GetTestId(TestId.UserId));
+
+            // need a paid account to test wrong user (returns error if userid is not a valid user id)
+            //var wrongUser = await Api.ListProjectEntriesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 12, 19), new DateTime(2014, 12, 20), userId: GetTestId(TestId.UserId2));
+
+            Assert.Equal(TEST_HOUR_NOTES, notBillable.First().Notes);
+            Assert.Equal(0, billable.Count());
+            Assert.Equal(TEST_HOUR_NOTES, notBilled.First().Notes);
+            Assert.Equal(0, billed.Count());
+            Assert.Equal(TEST_HOUR_NOTES, notClosed.First().Notes);
+            Assert.Equal(0, closed.Count());
+            Assert.Equal(TEST_HOUR_NOTES, rightUser.First().Notes);
+            //Assert.Equal(0, wrongUser.Count());
+        }
+
+        [Fact]
+        public async Task ListUserExpensesAsync_ReturnsExpenses()
+        {
+            var list = await Api.ListUserExpensesAsync(GetTestId(TestId.UserId), new DateTime(2014, 11, 6), new DateTime(2014, 11, 7));
+
+            Assert.True(list != null, "Result list is null.");
+            Assert.NotEqual(0, list.First().Id);
+            Assert.Equal(TEST_EXPENSE_NOTES, list.First().Notes);
+        }
+
+        [Fact]
+        public async Task ListUserExpensesAsync_FiltersCorrectly()
+        {
+            var notClosed = await Api.ListUserExpensesAsync(GetTestId(TestId.UserId), new DateTime(2014, 11, 6), new DateTime(2014, 11, 7), isClosed: false);
+            var closed = await Api.ListUserExpensesAsync(GetTestId(TestId.UserId), new DateTime(2014, 11, 6), new DateTime(2014, 11, 7), isClosed: true);
+
+            Assert.Equal(TEST_EXPENSE_NOTES, notClosed.First().Notes);
+            Assert.Equal(0, closed.Count());
+        }
+
+        [Fact]
+        public async Task ListProjectExpensesAsync_ReturnsExpenses()
+        {
+            var list = await Api.ListProjectExpensesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 11, 6), new DateTime(2014, 11, 7));
+
+            Assert.True(list != null, "Result list is null.");
+            Assert.NotEqual(0, list.First().Id);
+            Assert.Equal(TEST_EXPENSE_NOTES, list.First().Notes);
+        }
+
+        [Fact]
+        public async Task ListProjectExpensesAsync_FiltersCorrectly()
+        {
+            var notBilled = await Api.ListProjectExpensesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 11, 6), new DateTime(2014, 11, 7), isBilled: false);
+            var billed = await Api.ListProjectExpensesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 11, 6), new DateTime(2014, 11, 7), isBilled: true);
+            var notClosed = await Api.ListProjectExpensesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 11, 6), new DateTime(2014, 11, 7), isClosed: false);
+            var closed = await Api.ListProjectExpensesAsync(GetTestId(TestId.ProjectId), new DateTime(2014, 11, 6), new DateTime(2014, 11, 7), isClosed: true);
+
+            Assert.Equal(TEST_EXPENSE_NOTES, notBilled.First().Notes);
+            Assert.Equal(0, billed.Count());
+            Assert.Equal(TEST_EXPENSE_NOTES, notClosed.First().Notes);
+            Assert.Equal(0, closed.Count());
+        }
+        #endregion
+
     }
 }
